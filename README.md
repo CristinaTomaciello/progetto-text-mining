@@ -18,14 +18,14 @@ Il progetto si articola in tre fasi principali:
      * **Classe di Sentiment** *(es. Negative).*
   * Azione Richiesta: Addestrare un modello all'avanguardia (come una versione moderna di BERT/ModernBERT) sui dataset forniti (Restaurant-ACOS, Laptop-ACOS) per eseguire questa estrazione. L'obiettivo è superare, o almeno replicare, lo State-of-the-Art del 2021.
 
-* **Fase 2**: **Applicazione e Aggregazione Statistica**
+* **Fase 2**: *Applicazione e Aggregazione Statistica*
    * Una volta addestrato il modello ACOS, lo si applica per raccogliere informazioni da un grande set di dati:
      * **Applicazione**: Utilizzare il modello ACOS per estrarre quadruple da tutte le recensioni del dataset SPACE (quelle relative agli hotel).
     * **Aggregazione**: Dopo aver estratto migliaia di quadruple (es. [service, fast, Positive] o [bed, room, uncomfortable, Negative]), devi aggregarle automaticamente per ottenere statistiche significative.
      * **Esempio di output aggregato**: "Su 1000 quadruple relative all'aspetto 'Food', 830 hanno come opinione 'poco cotta' e sentiment 'Negative'."
     * **Obiettivo**: Ottenere opinioni informative e quantificate.
 
-* **Fase 3**: **Generazione del Riassunto e Valutazione**
+* **Fase 3**: *Generazione del Riassunto e Valutazione*
 L'ultima fase consiste nel produrre il riassunto finale e valutarne la qualità.
     * **Generazione del Riassunto (Verbalizzazione)**: Le statistiche aggregate (Fase 2) devono essere passate a un Modello Linguistico di Grande Dimensione (LLM).
     * **Metodo**: Probabilmente tramite Prompting (chiedendo all'LLM di trasformare i dati statistici in un testo fluente e coerente, come "Il X% degli utenti afferma che...").
