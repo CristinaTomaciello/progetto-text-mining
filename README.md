@@ -35,8 +35,11 @@ Valutazione (Benchmarking):
 Qualità del Riassunto: Confrontare la qualità del riassunto generato con l'LLM con gli attuali gold standard (riassunti umani) del dataset SPACE.
 
 Metodo di Valutazione: Utilizzare l'approccio "LLM-as-a-judge" (un altro LLM valuta la qualità e la precisione dei riassunti generati).
+
 RIFERIMENTI:
 GITHUB ACOS: https://github.com/NUSTM/ACOS/tree/main
+
 PAPER ACOS: https://aclanthology.org/2021.acl-long.29/
+
 PAPER SPACE: https://arxiv.org/pdf/2012.04443
 
