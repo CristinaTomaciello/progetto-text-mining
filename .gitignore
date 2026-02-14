@@ -2,3 +2,12 @@
 venvTextMining/
 Data/
 wandb/
+
+# Ignora le cartelle dei modelli
+best_model_laptop/
+best_model_restaurant/
+
+# Ignora i file pesanti
+*.safetensors
+*.bin
+*.pt
