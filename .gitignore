@@ -6,6 +6,8 @@ wandb/
 # Ignora le cartelle dei modelli
 best_model_laptop/
 best_model_restaurant/
+best_classifier_laptop/
+best_classifier_restaurant/
 
 # Ignora i file pesanti
 *.safetensors
