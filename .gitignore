@@ -4,6 +4,8 @@ Data/
 wandb/
 
 # Ignora le cartelle dei modelli
+best_multitask_extractor_laptop/
+best_multitask_extractor_restaurant/
 best_model_laptop/
 best_model_restaurant/
 best_classifier_laptop/
