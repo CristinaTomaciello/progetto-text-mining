@@ -1,5 +1,6 @@
 .DS_Store
 venvTextMining/
+venv/
 Data/
 wandb/
 
