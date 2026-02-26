@@ -3,6 +3,7 @@ venvTextMining/
 venv/
 Data/
 wandb/
+space/
 
 # Ignora le cartelle dei modelli
 best_multitask_extractor_laptop/

@@ -43,5 +43,7 @@ Qualità del Riassunto: Confrontare la qualità del riassunto generato con l'LLM
 
 * PAPER ACOS: https://aclanthology.org/2021.acl-long.29/
 
-* PAPER SPACE: https://arxiv.org/pdf/2012.04443
+* [PAPER SPACE](https://arxiv.org/pdf/2012.04443)
+
+* [GITHUB SPACE](https://github.com/stangelid/qt)
 
