@@ -47,3 +47,4 @@ Qualità del Riassunto: Confrontare la qualità del riassunto generato con l'LLM
 
 * [GITHUB SPACE](https://github.com/stangelid/qt)
 
+* [Massive Text Embedding Benchmark](https://huggingface.co/spaces/mteb/leaderboard): sito web, serve per l'aggregrazione delle parole. 
