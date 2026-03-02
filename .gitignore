@@ -17,3 +17,12 @@ best_classifier_restaurant/
 *.safetensors
 *.bin
 *.pt
+
+# LaTeX temporary files
+*.aux
+*.log
+*.toc
+*.out
+*.fdb_latexmk
+*.fls
+*.synctex.gz

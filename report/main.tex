@@ -1,0 +1,94 @@
+\documentclass[10pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{amsmath, amsfonts, geometry, booktabs, xcolor, float}
+\geometry{margin=2cm}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{graphicx} % Pacchetto obbligatorio per le immagini
+\usepackage{float}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue, % Colora i link di blu invece dei quadrati rossi
+}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% Definizione dello stile per il codice Python
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{gray},
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!5}
+}
+\title{Progetto text mining}
+\author{Cristina Tomaciello}
+\date{February 2026}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\chapter{Pre-processing dei Dati e Ingegnerizzazione delle Feature}
+\label{sec:preprocessing}
+
+La fase di pre-processing è stata progettata per trasformare i dati grezzi del dataset ACOS in un formato strutturato, compatibile con un'architettura neurale avanzata basata su ModernBERT. A differenza degli approcci standard, la pipeline implementata risolve attivamente tre sfide critiche del task: la corruzione dei dati in fase di lettura, la frammentazione dei token durante l'allineamento delle etichette e la propagazione dell'errore nella classificazione degli elementi impliciti.
+
+\section{Raw Data Parsing e Deep Decoding}
+I dataset di partenza (Laptop-ACOS e Restaurant-ACOS) si presentano in formato TSV con una struttura interna complessa, in cui le quadruple target contengono a loro volta spazi e tabulazioni che causano frequenti errori di disallineamento nei parser tradizionali. 
+Per ovviare a questo problema, è stata implementata una strategia di lettura flessibile: l'intero contenuto di ogni riga è stato forzato all'interno di un'unica colonna testuale utilizzando un delimitatore fittizio. Successivamente, un algoritmo di \textit{deep parsing} ha separato il testo della recensione dalle stringhe target, decodificando queste ultime in dizionari strutturati. Questa fase ha permesso di estrarre in modo deterministico le coordinate testuali (\textit{spans}) per gli Aspetti e le Opinioni, la Categoria semantica e la polarità del Sentimento, isolando fin da subito i valori Nulli \texttt{(-1, -1)} rappresentanti gli elementi impliciti.
+
+\section{Tokenizzazione Robusta e Allineamento Sub-word}
+Il paper originale utilizza \textit{BERT-base-uncased} come encoder principale. Nel nostro approccio, per massimizzare la comprensione del contesto e risolvere la sfida degli aspetti impliciti, l'architettura è stata aggiornata utilizzando \textbf{ModernBERT-base} (2024).
+
+Il passaggio a un modello basato su sub-word tokenization introduce il problema del disallineamento: una singola parola annotata originariamente nel dataset può essere spezzata in più frammenti (sub-tokens) dal tokenizer, causando la perdita delle etichette BIO (Begin-Inside-Outside).
+Per garantire un mapping rigoroso, è stata ingegnerizzata una funzione di allineamento custom basata sull'estrazione dei \texttt{word\_ids}. L'algoritmo assicura che se una parola originaria è etichettata come \texttt{B-ASP} (Begin-Aspect), il primo sub-token riceverà l'etichetta \texttt{B-ASP}, mentre tutti i successivi frammenti della stessa parola erediteranno correttamente l'etichetta \texttt{I-ASP}. 
+
+Inoltre, durante questa fase, il sistema esamina gli \textit{spans} estratti: qualora vengano rilevate le coordinate \texttt{(-1, -1)}, vengono attivati due flag binari a livello di frase (\texttt{implicit\_aspect\_label} e \texttt{implicit\_opinion\_label}). Queste feature sono state predisposte per alimentare direttamente le due teste di classificazione lineari posizionate sul token \texttt{[CLS]} nello Step 1 dell'architettura.
+
+\section{Hard Negative Sampling e Preparazione del Cross-Encoder}
+Per lo Step 2 della pipeline (Classificazione della Quadrupla), il dataset è stato trasformato per supportare un'architettura di tipo \textit{Cross-Encoder}. Invece di classificare la frase in isolamento, il modello deve valutare specifiche coppie Aspetto-Opinione.
+
+Per mitigare il problema della \textbf{propagazione dell'errore} (ovvero la tendenza del classificatore a confermare accoppiamenti errati estratti dallo Step 1), è stata implementata una strategia di \textit{Hard Negative Sampling} durante la creazione del dataset.
+Per ogni recensione, il sistema genera un prodotto cartesiano tra tutti gli span di aspetto e di opinione presenti. La vera innovazione risiede nell'iniezione forzata delle coordinate implicite \texttt{(-1, -1)} in \textit{tutte} le frasi. 
+Ciò costringe il generatore a creare deliberatamente combinazioni invalide (es. un aspetto reale abbinato a un'opinione implicita inesistente per quel contesto). 
+
+Mentre alle combinazioni corrette viene assegnato l'ID del Sentimento originario (0, 1 o 2), a tutte le combinazioni fallaci (Hard Negatives) viene assegnata in modo deterministico una quarta classe (\texttt{Class 3: Invalid}). Infine, a tutte le coordinate estratte è stato applicato un offset di \texttt{+1} per compensare l'inserimento del token speciale \texttt{[CLS]} all'inizio dei tensori di input. Questo approccio obbliga il Cross-Encoder ad agire come un filtro severo, imparando a rigettare i Falsi Positivi e garantendo una drastica riduzione degli errori in fase di inferenza end-to-end.
+
+
+\chapter{Architettura del Modello e Addestramento}
+\label{sec:architecture}
+
+Il sistema implementato per l'estrazione delle quadruple ACOS (Aspect, Category, Opinion, Sentiment) segue il paradigma \textit{Extract-then-Classify}. Tuttavia, per mitigare il problema della propagazione dell'errore tipico delle architetture a cascata, i due moduli (Step 1 e Step 2) sono stati profondamente re-ingegnerizzati introducendo componenti strutturali custom basate sul language model \textbf{ModernBERT-base}.
+
+\section{Step 1: Estrazione Multi-Task con Layer CRF}
+Il primo stadio della pipeline (Extractor) ha il compito di individuare gli \textit{spans} testuali relativi ad Aspetti e Opinioni. Per risolvere la complessità derivante dalla presenza di elementi impliciti, il modello è stato strutturato come un'architettura Multi-Task.
+
+\begin{itemize}
+    \item \textbf{Sequence Labeling con CRF:} A differenza delle classiche reti con classificazione lineare token-by-token (Cross-Entropy), in cima all'encoder è stato integrato un layer \textit{Conditional Random Field} (CRF). In fase di addestramento, il CRF apprende le probabilità di transizione tra le etichette BIO (Begin-Inside-Outside); in fase di inferenza, utilizza l'algoritmo di Viterbi per decodificare matematicamente la sequenza globale più probabile, garantendo l'estrazione di \textit{spans} grammaticalmente validi ed eliminando le transizioni illegali (es. un tag \texttt{I-ASP} non preceduto da \texttt{B-ASP}).
+    \item \textbf{Classificazione degli Impliciti sul token \texttt{[CLS]}:} Parallelamente al CRF, due teste di classificazione lineari indipendenti sono state agganciate al token speciale \texttt{[CLS]} (che cattura la rappresentazione globale della frase) per eseguire una classificazione binaria sulla presenza di aspetti e opinioni implicite.
+    \item \textbf{Loss Multi-Task Bilanciata:} Per far convergere i tre task simultaneamente, la funzione di Loss è stata calcolata come una combinazione lineare della Negative Log-Likelihood del CRF e della Cross-Entropy delle due teste binarie. Per contrastare il forte sbilanciamento delle classi (gli elementi impliciti sono rari nel dataset), è stato applicato un peso di penalità elevato (\textit{weight=5.0}) alla classe di minoranza, forzando la rete a prestare maggiore attenzione a questi casi critici.
+\end{itemize}
+
+\section{Step 2: Classificazione Cross-Encoder e Filtraggio Dinamico}
+Il secondo stadio (Classifier) riceve le coppie Aspetto-Opinione generate tramite un prodotto cartesiano dagli span estratti nello Step 1, con l'obiettivo di associarvi la corretta Categoria semantica e la polarità del Sentimento.
+
+\begin{itemize}
+    \item \textbf{Interazione Cross-Encoder:} L'architettura è stata progettata come un \textit{Cross-Encoder}. Invece di passare vettori numerici indipendenti, le coordinate estratte dallo Step 1 vengono convertite in testo. Alla recensione originale viene concatenato un \textit{prompt} linguistico esplicito (es. \texttt{[CLS] Recensione [SEP] aspect: X opinion: Y [SEP]}). Questa stringa unificata permette al meccanismo di Self-Attention di ModernBERT di calcolare nativamente l'interazione semantica profonda tra il contesto della frase e la specifica coppia in esame.
+    \item \textbf{Weight Sharing (Continuità di Apprendimento):} Per massimizzare le performance, lo Step 2 non viene inizializzato da zero, bensì eredita i pesi dell'encoder addestrato in precedenza nello Step 1, sfruttando la conoscenza di dominio già acquisita.
+    \item \textbf{Filtro Hard Negatives (4-Class Output):} Per gestire le coppie fallaci generate dal prodotto cartesiano, ciascuna testa di classificazione (una per ogni categoria del dominio) emette 4 \textit{logits}. Tre classi rappresentano il Sentimento (Negativo, Neutro, Positivo), mentre la quarta funge da "Filtro di Invalidità", permettendo al modello di scartare le combinazioni errate.
+    \item \textbf{Grid Search per Ottimizzazione Macro-F1:} In fase di inferenza, l'approccio classico basato su \texttt{argmax} è stato sostituito da una \textit{Grid Search} dinamica sulle probabilità \textit{Softmax}. Il sistema testa un range di soglie di confidenza (es. dal 30\% al 99\%) per determinare in modo empirico il \textit{threshold} di invalidità ottimale. La selezione della soglia migliore è guidata dalla massimizzazione del \textbf{Macro F1-Score}, garantendo che il modello risulti equilibrato e non si polarizzi sulla classe maggioritaria.
+\end{itemize}
+
+\section{Inferenza End-to-End e Ottimizzazioni Hardware}
+Nell'utilizzo End-to-End, il sistema combina organicamente le due fasi. In presenza di etichette implicite rilevate sul token \texttt{[CLS]} nello Step 1, il sistema inietta automaticamente le coordinate fittizie \texttt{(-1, -1)} nel prodotto cartesiano, passandole allo Step 2 sotto forma di stringa \texttt{"null"}.
+Infine, per gestire l'elevata complessità computazionale del Multi-Task Learning e del Cross-Encoder, l'intero training è stato ottimizzato avvalendosi di \textit{Mixed Precision (FP16)}, \textit{Gradient Checkpointing} e di un ottimizzatore \textit{AdamW a 8-bit} (tramite libreria \texttt{bitsandbytes}), permettendo l'addestramento efficiente del modello senza incorrere in saturazioni della memoria VRAM.
+
+\end{document}
