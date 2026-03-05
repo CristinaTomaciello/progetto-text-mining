@@ -94,7 +94,8 @@ def predict_quadruples_e2e(text, model_1, model_2, tokenizer, cat_list, device, 
                     
     return quadruples
 
-### VERSIONE CORRETTA per il dataset SPACE CHE USA LE STRINGHE E NON LE COORDINATE!
+# VERSIONE CORRETTA per il dataset SPACE CHE USA LE STRINGHE E NON LE COORDINATE!
+# La logica è la stessa, ma invece di restituire le coordinate degli span, restituiamo direttamente le stringhe corrispondenti.
 def predict_quadruples_space(text, model_1, model_2, tokenizer, cat_list, device, id2label, best_threshold):
     words = text.split()
     inputs = tokenizer(words, is_split_into_words=True, return_tensors="pt", truncation=True, max_length=128, padding='max_length').to(device)
