@@ -3,7 +3,7 @@ venvTextMining/
 venv/
 Data/
 wandb/
-space/
+progetto_space/space/
 
 # Ignora le cartelle dei modelli
 best_multitask_extractor_laptop/
@@ -46,6 +46,6 @@ build/
 *.log
 *.bak
 
-prompt_aggregati/
-quadruple_space_estratte.csv
-riassunti_finali/
+progetto_space/prompt_aggregati/
+progetto_space/quadruple_space_estratte.csv
+progetto_space/riassunti_finali/
