@@ -4,6 +4,7 @@ venv/
 Data/
 wandb/
 progetto_space/space/
+risultati_gliner/
 
 # Ignora le cartelle dei modelli
 best_multitask_extractor_laptop/
