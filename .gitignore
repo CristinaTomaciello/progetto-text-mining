@@ -1,18 +1,13 @@
 .DS_Store
 venvTextMining/
 venv/
-Data/
 wandb/
-progetto_space/space/
+progetto_space/
 risultati_gliner/
 
+
 # Ignora le cartelle dei modelli
-best_multitask_extractor_laptop/
-best_multitask_extractor_restaurant/
-best_model_laptop/
-best_model_restaurant/
-best_classifier_laptop/
-best_classifier_restaurant/
+models/
 
 # Ignora i file pesanti
 *.safetensors
@@ -47,6 +42,4 @@ build/
 *.log
 *.bak
 
-progetto_space/prompt_aggregati/
-progetto_space/quadruple_space_estratte.csv
-progetto_space/riassunti_finali/
+

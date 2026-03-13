@@ -21,8 +21,10 @@ I file sono organizzati per dominio (Laptop e Restaurant) e per modello utilizza
 ├── Laptop-ACOS-GLINER2.ipynb        # Valutazione Zero-Shot, metriche seqeval/sklearn e classificazione (dominio Laptop)
 ├── Restaurant-ACOS-GLINER2.ipynb    # Valutazione Zero-Shot, metriche seqeval/sklearn e classificazione (dominio Restaurant)
 ├── requirements.txt                 # Dipendenze del progetto
-├── data_parsing/                    # Cartella (generata dinamicamente) contenente i .pkl pre-processati
-├── modelli_salvati/                 # Cartella per i pesi dei modelli ModernBERT addestrati (Fase 1 e Fase 2)
+├── data_parsing/                    # Cartella (generata dinamicamente) contenente i .pkl pre-processati per l'inferenza finale (Quadruple Extraction)
+├── data_allineati/                  # Cartella per i dataset allineati e etichettati in formato BIO (output del pre-processing)
+├── data_coppie/                     # Cartella per i dataset di coppie testo-categoria per l'addestramento della rete custom (output del pre-processing)
+├── models/                          # Cartella per i pesi dei modelli ModernBERT addestrati (Fase 1 e Fase 2)
 └── risultati_gliner/                # Cartella per il salvataggio delle predizioni Zero-Shot
 ```
 
@@ -46,16 +48,23 @@ pip install -r requirements.txt
 ``` 
 
 ## Come eseguire il codice
-Il progetto deve essere eseguito in un ordine specifico. I notebook sono progettati per guidarti passo passo.
 
 ### Step 1: Pre-processing dei Dati
-Esegui per primo il notebook pre-processing-ACOS.ipynb. Questo script prenderà i dati raw (testo e tuple) e li trasformerà gestendo l'allineamento dei sub-token e salvando i dataset pronti per il training all'interno della cartella data_parsing/.
+Questo notebook non è necessario da eseguire per poter testare direttamente i modelli, perchè i risultati del pre-processing sono già stati salvati in formato .pkl all'interno del repository. Tuttavia, se desideri eseguire nuovamente il pre-processing o comprendere meglio come sono stati preparati i dati, puoi eseguire il notebook **pre-processing-ACOS.ipynb**. <br>
+I dati che servono per poter eseguire i notebook di modernBERT sono:
+- **step_1**: i file .pkl generati dal notebook pre-processing-ACOS.ipynb, che contengono i dataset allineati e etichettati in formato BIO, contenuti nella cartella **data_allineati/**.
+- **step_2**: i file .pkl generati dal notebook pre-processing-ACOS.ipynb, che contengono le coppie di testo e categorie (label) per l'addestramento della rete custom, contenuti nella cartella **data_coppie/**.
 
 ### Step 2: Esecuzione di ModernBERT (Fine-Tuning o Inferenza locale)
-- Apri il notebook relativo al dominio che desideri testare (es. Restaurant-ACOS-ModernBERT.ipynb).ù
+- Apri il notebook relativo al dominio che desideri testare (es. Restaurant-ACOS-ModernBERT.ipynb).
 Per addestrare il modello da zero: Esegui tutte le celle in sequenza. Il notebook addestrerà le due reti custom e salverà i pesi localmente.
 
-- Per bypassare l'addestramento (Inferenza Rapida): Se non desideri ri-eseguire il training completo, puoi saltare le celle di addestramento. Il codice è predisposto per caricare direttamente i pesi dei modelli delle due fasi (Fase 1 e Fase 2) precedentemente salvati nella cartella locale (es. modelli_salvati/), passando subito alla valutazione tramite Exact Match.
+- Per bypassare l'addestramento (Inferenza Rapida): Se non desideri ri-eseguire il training completo, puoi saltare le celle di addestramento. Il codice è predisposto per caricare direttamente i pesi dei modelli delle due fasi (Fase 1 e Fase 2) precedentemente salvati nella cartella locale (es. models/), passando subito alla valutazione tramite Exact Match. La cella per l'inferenza sulla quadrupla completa si trova alla fine del notebook di entrambi i domini. Qui i dati vengono presi dalla cartella **data_parsing/** che è caricata dentro la repository.  <br>
+
+Per poter eseguire l'inferenza rapida, è necessario scaricare i pesi dei modelli addestrati (Step 2) e salvarli localmente nella cartella **models/**. Ecco come fare: 
+1. Scarica l'archivio dei modelli: [models.zip](https://liveunibo-my.sharepoint.com/:u:/g/personal/cristina_tomaciello_studio_unibo_it/IQCt16EHmUJ4QZQU7u-AgcTYAeST0XAYBpOlUvutHHB78xw?e=YehUDS)
+2. Estrai il contenuto dell'archivio
+
 
 ### Step 3: Valutazione GLiNER 2 (Zero-Shot)
 Apri i notebook Laptop-ACOS-GLINER2.ipynb o Restaurant-ACOS-GLINER2.ipynb. Questi notebook non richiedono addestramento: scaricheranno in automatico i pesi del modello base di GLiNER 2 ed eseguiranno l'estrazione strutturata tramite prompt, valutando i risultati attraverso un set di metriche disaccoppiate (Entity-Level F1 con seqeval, Token-Level F1 con sklearn, e Classificazione Astratta).
