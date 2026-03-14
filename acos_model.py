@@ -89,7 +89,7 @@ class ModernBertACOS_Extractor(nn.Module):
             
         return {
             "loss": loss, 
-            "token_logits": token_preds_tensor,  # ORA CONTIENE GIA' I TAG DECISI!
+            "token_logits": token_preds_tensor,
             "imp_asp_logits": imp_asp_logits, 
             "imp_opi_logits": imp_opi_logits
         }

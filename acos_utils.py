@@ -1,7 +1,36 @@
 import torch
 import torch.nn as nn
 from transformers import AutoModel
-from torchcrf import CRF        
+from torchcrf import CRF 
+import random
+import numpy as np
+from torch.utils.data import Dataset
+import torch.nn.functional as F
+
+
+def set_seed(seed_value=42):
+    ''''Imposta il seed per tutte le librerie coinvolte per garantire la riproducibilità.'''
+    random.seed(seed_value)
+    np.random.seed(seed_value)
+    torch.manual_seed(seed_value)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed_value)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    
+    # Restituiamo il generator pronto all'uso
+    g = torch.Generator()
+    g.manual_seed(seed_value)
+    return g
+
+def seed_worker(worker_id):
+    '''imposta il seed per ogni worker del DataLoader per garantire la riproducibilità anche con shuffle=True'''
+    worker_seed = torch.initial_seed() % 2**32
+    np.random.seed(worker_seed)
+    random.seed(worker_seed)  
+    
+
+        
 def get_spans(tags, b_tag, i_tag):
     spans = []
     start = -1
@@ -16,6 +45,7 @@ def get_spans(tags, b_tag, i_tag):
                 start = -1
     if start != -1: spans.append((start, len(tags)))
     return spans
+
 
 def predict_quadruples_e2e(text, model_1, model_2, tokenizer, cat_list, device, id2label, best_threshold):
     words = text.split()

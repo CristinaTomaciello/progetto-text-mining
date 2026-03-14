@@ -4,6 +4,7 @@ venv/
 wandb/
 progetto_space/
 risultati_gliner/
+risultati_modernBERT/
 
 
 # Ignora le cartelle dei modelli
