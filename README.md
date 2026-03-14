@@ -61,7 +61,7 @@ Per addestrare il modello da zero: Esegui tutte le celle in sequenza. Il noteboo
 
 - Per bypassare l'addestramento (Inferenza Rapida): Se non desideri ri-eseguire il training completo, puoi saltare le celle di addestramento. Il codice è predisposto per caricare direttamente i pesi dei modelli delle due fasi (Fase 1 e Fase 2) precedentemente salvati nella cartella locale (es. models/), passando subito alla valutazione tramite Exact Match. La cella per l'inferenza sulla quadrupla completa si trova alla fine del notebook di entrambi i domini. Qui i dati vengono presi dalla cartella **data_parsing/** che è caricata dentro la repository.  <br>
 
-Per poter eseguire l'inferenza rapida, è necessario scaricare i pesi dei modelli addestrati (Step 2) e salvarli localmente nella cartella **models/**. Ecco come fare: 
+Per poter eseguire l'inferenza rapida, è necessario scaricare i pesi dei modelli addestrati e salvarli localmente nella cartella **models/**. Ecco come fare: 
 1. Scarica l'archivio dei modelli: [models.zip](https://liveunibo-my.sharepoint.com/:u:/g/personal/cristina_tomaciello_studio_unibo_it/IQCt16EHmUJ4QZQU7u-AgcTYAeST0XAYBpOlUvutHHB78xw?e=YehUDS)
 2. Estrai il contenuto dell'archivio
 
