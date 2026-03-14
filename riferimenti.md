@@ -10,4 +10,4 @@
 
 * [Massive Text Embedding Benchmark](https://huggingface.co/spaces/mteb/leaderboard): sito web, serve per l'aggregrazione delle parole. 
 
-* [GitHub GLiNER2](https://huggingface.co/fastino/gliner2-large-v1): modello di estrazione di informazioni che useremo per la fase 1.
+* [GitHub GLiNER2](https://huggingface.co/fastino/gliner2-large-v1): modello di estrazione di informazioni che useremo per la fase 1. 
